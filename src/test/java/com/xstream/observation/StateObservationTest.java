@@ -4,10 +4,11 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-import com.xstream.observation.StateObservation;
 
 /**
  * Unit test for simple App.
@@ -32,17 +33,26 @@ public class StateObservationTest extends TestCase
         return new TestSuite(StateObservationTest.class);
     }
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-      
-        Student student = getStudentDetails();
-      
-        //Object to XML Conversion
-        StateObservation.retrieveObject(student, "object_state.txt");
 
+    public void testStateObservation()
+    {
+        Student student = getStudentDetails();
+        StateObservation.retrieveObject(student, "studentObservationTest1.xml");
+        Student student2 = getStudentDetails();
+        StateObservation.retrieveObject(student2, "studentObservationTest2.xml");
+		StateObservation.retrieveObject(student2, "studentObservationTest2.xml");
+		StateObservation.retrieveObject(student2, "studentObservationTest2.xml");
+        StateObservation.retrieveObject(student, "studentObservationTest1.xml");
+		
+		
+		// System.out.println(StateObservation.getObservationsNumber("oracles",1));
+		//
+		// assertEquals(StateObservation.getObservationsNumber("oracles",1), StateObservation.getObservationsNumber("oracles",0));
+		//
+		// String buggy = StateObservation.fromXMLToObject("oracles/1#studentObservationTest1-slicer.xml");
+		// String exp = StateObservation.fromXMLToObject("oracles/1#studentObservationTest1.xml");
+		//
+		// StateObservation.assertObjectEquals(buggy, exp);
     }
 	
     private Student getStudentDetails() {
@@ -50,6 +60,24 @@ public class StateObservationTest extends TestCase
        Student student = new Student();
        student.setFirstName("Mahesh");
        student.setLastName("Parashar");
+       student.setRollNo(1);
+       student.setClassName("1st");
+
+       Address address = new Address();
+       address.setArea("H.No. 16/3, Preet Vihar.");
+       address.setCity("Delhi");
+       address.setState("Delhi");
+       address.setCountry("India");
+       address.setPincode(110012);
+
+       student.setAddress(address);
+       return student;
+    }
+    private Student getStudentDetails2() {
+   
+       Student student = new Student();
+       student.setFirstName("Sofia");
+       student.setLastName("Reis");
        student.setRollNo(1);
        student.setClassName("1st");
 

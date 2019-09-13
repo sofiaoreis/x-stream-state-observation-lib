@@ -12,9 +12,21 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.*;
+import org.xmlunit.diff.ElementSelectors;
+import org.xmlunit.diff.DefaultNodeMatcher;
+
+import java.util.HashMap;
+
 
 public class StateObservation 
-{
+{	
+	public static HashMap<String, Integer> executions = new HashMap<String, Integer>();
 	
 	public static void main(String[] args) {
 
@@ -27,9 +39,69 @@ public class StateObservation
 	}
 	
 	public static void retrieveObject(Object o, String path){
+
+		int exec_i = 0;
+
+		File directory = new File("oracles/");
+		if(!directory.exists()){
+		   directory.mkdir();
+		}
+
+		if (executions.containsKey(path)){
+			int i = executions.get(path);
+			exec_i = i + 1;
+			executions.replace(path, exec_i);
+		}
+		else{
+			executions.put(path, 1);
+			exec_i = 1;
+		}
+				
 	    XStream xstream = new XStream(new StaxDriver()); 
+		XStream.setupDefaultSecurity(xstream);
 		String xml = xstream.toXML(o); 
-		formatXml(xml, path);	
+		
+		formatXml(xml, "oracles/"+exec_i+'#'+path);
+	}
+	
+	public static int getObservationsNumber(String path, int slicing)
+	{		
+		File folder = new File(path);
+		String[] fileNames = folder.list();
+		int total_slicer = 0; int total = 0;
+		for(int i = 0; i< fileNames.length; i++)
+		{
+		  if(fileNames[i].contains("slicer.xml")){
+		      total_slicer++;
+		     }   
+   		  if(!fileNames[i].contains("slicer.xml")){
+   		      total++;
+   		     }
+		}
+		
+		if(slicing == 1)
+			return total_slicer;
+		else
+			return total;
+	
+	}
+	
+	public static void assertObjectEquals(String buggy, String exp){
+		
+		assertThat(buggy, isSimilarTo(exp).withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText)));
+			
+	}
+
+	public static String fromXMLToObject(String path){
+		
+		try{
+			String contents = new String(Files.readAllBytes(Paths.get(path)));			
+			return contents;
+
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 			
 	public static void formatXml(String xml, String path) {
