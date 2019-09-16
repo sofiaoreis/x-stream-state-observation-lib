@@ -50,7 +50,7 @@ public class StateObservation
 		if (executions.containsKey(path)){
 			int i = executions.get(path);
 			exec_i = i + 1;
-			executions.replace(path, exec_i);
+			executions.put(path, exec_i);
 		}
 		else{
 			executions.put(path, 1);
